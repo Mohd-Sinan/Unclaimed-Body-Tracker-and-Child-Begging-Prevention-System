@@ -241,7 +241,7 @@ The system is designed to make silent forensic tampering detectable.
 
 ---
 
-## Adapter Layer
+# Adapter Layer
 
 CorpseID includes a custom machine-learning adapter layer designed to improve identity classification on top of raw facial embeddings.
 
