@@ -1,0 +1,2297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Face Similarity Viewer | Missing Persons ID System</title>
+<style>
+    /* =========================================
+   TWO COLOR MODERN UI - STRICT PALETTE
+   #A4193D (dark/primary)
+   #FFDFB9 (light/secondary)
+========================================= */
+
+:root{
+    --dark:#A4193D;
+    --light:#FFDFB9;
+
+    /* CHILD PALETTE */
+    --child-dark:#123f89;
+    --child-light:#F59E0B;
+
+    --radius:14px;
+    --shadow-sm:0 2px 8px rgba(164,25,61,0.10);
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html, body {
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    position: fixed;
+}
+
+body{
+    font-family:"Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    background:var(--light);
+    color:var(--dark);
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Tab Header */
+.tab-header{
+    display:flex;
+    gap:10px;
+    padding:12px 20px;
+    background:var(--light);
+    border-bottom:2px solid var(--dark);
+    flex-shrink: 0;
+}
+
+.tab-btn{
+    padding:8px 20px;
+    border:none;
+    border-radius:40px;
+    background:var(--dark);
+    color:var(--light);
+    font-weight:700;
+    font-size:0.9rem;
+    cursor:pointer;
+}
+
+.tab-btn.active{
+    background:var(--light);
+    color:var(--dark);
+    border:2px solid var(--dark);
+}
+
+/* Tab Panels */
+.tab-panel{
+    display:none;
+    flex: 1;
+    overflow: hidden;
+}
+
+.tab-panel.active{
+    display: flex;
+    flex-direction: column;
+}
+
+/* Container */
+.container{
+    display:flex;
+    gap:12px;
+    padding:12px;
+    flex: 1;
+    overflow: scroll;
+}
+
+/* LEFT PANEL - For images */
+.left-pane{
+    flex: 2;
+    background:var(--dark);
+    border-radius:20px;
+    border:2px solid var(--light);
+    padding:15px;
+    overflow-y: auto;
+    box-shadow:var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+}
+
+.left-pane h3 {
+    color: var(--light);
+    margin-bottom: 12px;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+/* Image gallery - wraps images to new rows */
+.image-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-content: flex-start;
+}
+
+.image-preview-item {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
+    border: 2px solid var(--light);
+    overflow: hidden;
+    background: var(--light);
+    flex-shrink: 0;
+}
+
+.image-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-preview-item .remove-img {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: var(--dark);
+    color: var(--light);
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.empty-gallery {
+    color: var(--light);
+    text-align: center;
+    padding: 40px;
+    font-size: 14px;
+    opacity: 0.8;
+    width: 100%;
+}
+
+/* RIGHT PANEL - Compact form */
+.right-pane{
+    flex: 1;
+    max-width: 380px;
+    background:var(--dark);
+    border-radius:20px;
+    border:2px solid var(--light);
+    overflow-y: auto;
+    padding:15px;
+    box-shadow:var(--shadow-sm);
+}
+
+.right-pane::-webkit-scrollbar{
+    width: 4px;
+}
+
+.right-pane::-webkit-scrollbar-thumb{
+    background: var(--light);
+    border-radius: 999px;
+}
+
+/* Compact Form Styling */
+.missing-person-form {
+    background: var(--light);
+    border-radius: 16px;
+    padding: 12px;
+    border: 2px solid var(--dark);
+}
+
+.form-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.form-group {
+    margin-bottom: 10px;
+    flex: 1;
+}
+
+label {
+    color: var(--dark);
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 3px;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="file"],
+textarea,
+select {
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1.5px solid var(--dark);
+    background: var(--light);
+    color: var(--dark);
+    font-size: 12px;
+    outline: none;
+}
+
+textarea {
+    min-height: 50px;
+    resize: vertical;
+}
+
+button {
+    border: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: var(--dark);
+    color: var(--light);
+    font-weight: 600;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--dark);
+    margin: 12px 0 8px 0;
+    padding-bottom: 4px;
+    border-bottom: 1.5px solid var(--dark);
+}
+
+/* Mark Entry */
+.mark-entry {
+    background: var(--light);
+    border: 1.5px solid var(--dark);
+    border-radius: 10px;
+    padding: 6px;
+    margin-bottom: 6px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.mark-entry select, .mark-entry input {
+    flex: 1;
+    min-width: 80px;
+    padding: 4px 6px;
+    font-size: 11px;
+}
+
+.remove-mark {
+    background: var(--dark) !important;
+    padding: 4px 10px;
+    font-size: 10px;
+}
+
+/* ID DEAD TAB - ORIGINAL STYLES - UNCHANGED */
+#IDdead .left-pane,
+#IDchild .left-pane {
+    width: 320px;
+    min-width: 320px;
+    flex: none;
+}
+
+#IDdead .image-block,
+#IDchild .image-block {
+    position: relative;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 18px;
+    background: var(--light);
+    border: 2px solid var(--dark);
+    transition: 0.2s ease;
+    cursor: pointer;
+}
+
+#IDdead .image-block:hover,
+#IDchild .image-block:hover {
+    transform: translateY(-2px);
+}
+
+#IDdead .image-block input[type="checkbox"],
+#IDchild .image-block input[type="checkbox"] {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    transform: scale(1.1);
+    accent-color: var(--dark);
+    z-index: 2;
+}
+
+#IDdead .image-block img,
+#IDchild .image-block img {
+    width: 100%;
+    display: block;
+    border-radius: 14px;
+    object-fit: cover;
+}
+
+#IDdead .similarity,
+#IDchild .similarity {
+    margin-top: 8px;
+    padding: 8px;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 800;
+    background: var(--dark);
+    color: #FFDFB9;
+}
+
+#IDdead .similarity span,
+#IDchild .similarity span {
+    font-size: 14px;
+    font-weight: 900;
+}
+
+#IDdead .preview-container,
+#IDchild .preview-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--light);
+    border-radius: 20px;
+    border: 2px solid var(--dark);
+    margin: 0 12px;
+    padding: 10px;
+}
+
+#IDdead .preview-container img,
+#IDchild .preview-container img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 16px;
+    object-fit: contain;
+}
+
+#IDdead .filter-form,
+#IDchild .filter-form {
+    background: var(--light);
+    border-radius: 16px;
+    padding: 12px;
+    border: 2px solid var(--dark);
+}
+
+#IDdead input[type="range"],
+#IDchild input[type="range"] {
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--dark);
+    outline: none;
+    margin: 6px 0;
+}
+
+#IDdead input[type="range"]::-webkit-slider-thumb,
+#IDchild input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--light);
+    border: 2px solid var(--dark);
+    cursor: pointer;
+}
+
+#IDdead h3,
+#IDchild h3 {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--light);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--dark);
+    border-radius: 10px;
+}
+
+small {
+    font-size: 9px;
+}
+#tableWrapper{
+    overflow-y:auto;
+    background:var(--light);
+    border-radius:16px;
+    padding:12px;
+    border:2px solid var(--dark);
+}
+.confirmed-th{
+    background:var(--dark);
+    color:var(--light);
+    padding:12px;
+    border:1px solid var(--dark);
+}
+
+.mode-toggle{
+    display:flex;
+    gap:6px;
+    margin-left:auto;
+}
+
+.mode-btn{
+    border:none;
+    padding:8px 18px;
+    border-radius:40px;
+    font-weight:800;
+    cursor:pointer;
+}
+
+.mode-btn.dead_tg{
+    background:#A4193D;
+}
+.mode-btn.child_tg{
+    background:var(--child-dark);
+}
+</style>
+</head>
+<body>
+
+<!-- TAB HEADER -->
+<div class="tab-header">
+    <button class="dead tab-btn active" data-tab="missing">➕ Add Missing Person</button>
+    <button class="dead tab-btn" data-tab="IDdead">🔍 ID Dead / Match</button>
+    <button class="dead tab-btn" data-tab="confirmed">🔍 Confirmed Matches</button>
+    <button class="child tab-btn" data-tab="child_missing">➕ Add Missing Child</button>
+    <button class="child tab-btn" data-tab="IDchild">🔍 ID Child / Match</button>
+    <button class="child tab-btn" data-tab="child_confirmed">🔍 Confirmed Matches</button>
+    <button class="child tab-btn" data-tab="child_pending">🔍Pending Cases</button>
+
+    <div class="mode-toggle">
+        <button id="deadModeBtn" class="dead_tg mode-btn active">DEAD</button>
+        <button id="childModeBtn" class="child_tg mode-btn">CHILD</button>
+    </div>
+</div>
+<!-- TAB 1: ADD MISSING PERSON -->
+<div class="tab-panel active" id="missing">
+    <div class="container">
+        <!-- LEFT PANEL: Image Gallery -->
+        <div class="left-pane">
+            <h3>📸 Uploaded Images <span id="imageCount" style="font-size: 12px; opacity: 0.8;"></span></h3>
+            <div id="imageGallery" class="image-gallery">
+                <div class="empty-gallery">No images selected yet<br>Click "Choose Files" to add photos</div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: Compact Form -->
+        <div class="right-pane">
+            <h3 style="font-size: 1rem; color: var(--light);   margin-bottom: 10px;">📝 Register Missing Person</h3>
+            <form method="POST" action="/add_missing" enctype="multipart/form-data" class="missing-person-form" id="missingPersonForm">
+                <div class="form-group">
+                    <label>🖼️ Upload Photos</label>
+                    <input type="file" name="person_images" accept="image/*" multiple onchange="previewMultipleImages(event)" required>
+                    <small>Select multiple images for better accuracy</small>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>👤 Full Name</label>
+                        <input type="text" name="name" placeholder="Full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>📅 Date of Birth</label>
+                        <input type="date" name="dob" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>⚥ Gender</label>
+                        <select name="gender" required>
+                            <option value="">Select</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>🎨 Skin Tone</label>
+                        <select name="skin_tone" required>
+                            <option value="">Select</option>
+                            <option value="fair">Fair</option>
+                            <option value="medium">Medium</option>
+                            <option value="dark">Dark</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>📏 Height (cm)</label>
+                        <div style="display: flex; gap: 4px;">
+                            <input type="number" name="height_min" placeholder="Min" style="width: 50%;" required>
+                            <input type="number" name="height_max" placeholder="Max" style="width: 50%;" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>💇 Hair Color</label>
+                        <select name="hair_color" required>
+                            <option value="">Select</option>
+                            <option value="black">Black</option>
+                            <option value="brown">Brown</option>
+                            <option value="blonde">Blonde</option>
+                            <option value="grey">Grey</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>🧔 Facial Hair</label>
+                    <select name="facial_hair">
+                        <option value="none">None</option>
+                        <option value="beard">Beard</option>
+                        <option value="moustache">Moustache</option>
+                        <option value="bald">Bald</option>
+                    </select>
+                </div>
+
+                <div class="section-title">🔖 Scars / Tattoos</div>
+                <div id="marks-container"></div>
+                <button type="button" onclick='addMark("marks-container")' style="width: 100%; margin-top: 4px;">+ Add Mark</button>
+
+                <div class="section-title">📍 Last Known Location</div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>State</label>
+                        <input type="text" name="last_state" placeholder="State" required>
+                    </div>
+                    <div class="form-group">
+                        <label>City</label>
+                        <input type="text" name="last_city" placeholder="City" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Area/Landmark</label>
+                        <input type="text" name="last_area" placeholder="Area">
+                    </div>
+                    <div class="form-group">
+                        <label>Last Seen Date</label>
+                        <input type="date" name="last_seen_date" required>
+                    </div>
+                </div>
+
+                <button type="submit" style="width: 100%; margin-top: 8px;">💾 Save Missing Person Record</button>
+                <input type="hidden" name="form_type" value="add_missing">
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- TAB 2: ID DEAD / MATCHING - COMPLETELY UNCHANGED -->
+<div class="tab-panel" id="IDdead">
+    <div class="container">
+        <div class="left-pane" id="left-pane">
+            {% if sims and sims|length > 0 %}
+                {% for img in images %}
+                    {% set sim_val = sims[img] if img in sims else 0 %}
+                    {% set sim_percent = (sim_val * 100)|round(1) %}
+                    {% set meta = metadata_map.get(img, {}) %}
+                    <div class="image-block"
+                        data-sim="{{ sim_val }}"
+                        data-age="{{ meta.get('dob','') }}"
+                        data-gender="{{ meta.get('gender','') }}"
+                        data-skin="{{ meta.get('skin_tone','') }}"
+                        data-hair="{{ meta.get('hair_color','') }}"
+                        data-height-min="{{ meta.get('height_range_cm',{}).get('min','') }}"
+                        data-height-max="{{ meta.get('height_range_cm',{}).get('max','') }}"
+                        data-marks='{{ meta.get("marks", []) | tojson }}'>
+                        <input type="checkbox" name="confirm" value="{{ img }}" data-sim="{{ sim_val }}">
+                        <img src="{{ url_for('thumb_file', filename=filename_map[img]) }}" alt="{{ img }}">
+                        <div class="similarity">📊 <span>{{ sim_percent }}%</span></div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div style="color:var(--light); text-align:center; padding:20px;">
+                    <p>🔍 No matches yet</p>
+                    <p style="font-size:12px; margin-top:10px;">Upload an image to see similarity scores</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="preview-container">
+            {% if uploaded_image %}
+                <img src="{{ uploaded_image }}" alt="Uploaded Search Image">
+            {% else %}
+                <div style="text-align:center; color:var(--dark);">
+                    <p>📸 No Image Uploaded</p>
+                    <p style="font-size:12px;">Upload a face image for matching</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="right-pane" style="max-width: 340px;">
+            <form method="POST"action="{{ url_for('index') }}" enctype="multipart/form-data" style="margin-bottom: 15px;">
+                <label style="color:var(--light); font-weight:700; font-size:12px;">📤 Upload Face for Matching:</label>
+                <input type="file" name="file" accept="image/*" required style="margin:8px 0; background:var(--light);">
+                <button type="submit" style="width:100%;">🔍 Calculate Similarity Scores</button>
+                <input type="hidden" name="form_type" value="image_search">
+            </form>
+
+            <form id="filterForm" onsubmit="return false;" class="filter-form">
+                <h3 style="color:var(--dark); margin-bottom:12px;">🎯 Filter Results</h3>
+
+                <div class="form-group">
+                    <label>📊 Age Range: <span id="ageLabel"></span></label>
+                    <input type="range" id="age_min" min="0" max="100" value="{{ uploaded_metadata.age if uploaded_metadata and uploaded_metadata.age else 20 }}">
+                    <input type="range" id="age_max" min="0" max="100" value="{{ uploaded_metadata.age if uploaded_metadata and uploaded_metadata.age else 80 }}">
+                </div>
+
+                <div class="form-group">
+                    <label>📏 Height Range: <span id="heightLabel"></span></label>
+                    <input type="range" id="height_min" min="120" max="220" value="140">
+                    <input type="range" id="height_max" min="120" max="220" value="190">
+                </div>
+
+                <div class="form-group">
+                    <label>⚥ Gender:</label>
+                    <select name="gender">
+                        <option value="">Any</option>
+                        <option value="male" {% if uploaded_metadata and uploaded_metadata.gender == "male" %}selected{% endif %}>Male</option>
+                        <option value="female" {% if uploaded_metadata and uploaded_metadata.gender == "female" %}selected{% endif %}>Female</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>🎨 Skin Tone:</label>
+                    <select name="skin_tone">
+                        <option value="">Any</option>
+                        <option value="fair" {% if uploaded_metadata and uploaded_metadata.skin_tone == "fair" %}selected{% endif %}>Fair</option>
+                        <option value="medium" {% if uploaded_metadata and uploaded_metadata.skin_tone == "medium" %}selected{% endif %}>Medium</option>
+                        <option value="dark" {% if uploaded_metadata and uploaded_metadata.skin_tone == "dark" %}selected{% endif %}>Dark</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>💇 Hair Color:</label>
+                    <select name="hair_color">
+                        <option value="">Any</option>
+                        <option value="black">Black</option>
+                        <option value="brown">Brown</option>
+                        <option value="blonde">Blonde</option>
+                        <option value="grey">Grey</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>🔖 Filter by Marks:</label>
+                    <div id="marks-filter"></div>
+                    <button type="button" onclick='addMark("marks-filter")' style="margin-top:6px; width:100%;">+ Add Mark Filter</button>
+                </div>
+
+                <div class="form-group">
+                    <label>🎯 Min Similarity: <span id="threshold-value">0.50</span></label>
+                    <input type="range" id="threshold" min="0.0" max="1.0" step="0.01" value="0.5">
+                </div>
+
+                <button type="button" onclick="collectConfirmed()" style="width:100%; margin-top:8px;">✅ Confirm Match</button>
+                <input type="hidden" name="form_type" value="confirm_match">
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- TAB 3: CONFIRMED MATCHES -->
+<div class="tab-panel" id="confirmed">
+    <div class="container">
+    <div id="confirmedWrapper" style="width: 100%;">
+        <div class="left-pane" style="width:100%; flex:1;">
+            <h3>✅ Confirmed Matches</h3>
+
+            {% if matches and matches|length > 0 %}
+            <div id="tableWrapper">
+
+                <table style="
+                    width:100%;
+                    border-collapse:collapse;
+                    background:var(--light);
+                    color:var(--dark);
+                ">
+
+                    <thead>
+                        <tr>
+                            <th class="confirmed-th">Matched Person</th>
+                            <th class="confirmed-th">Similarity</th>
+                            <th class="confirmed-th">Uploaded Corpse</th>
+                            <th class="confirmed-th">Timestamp</th>
+                        </tr>
+                    </thead>
+
+                    {% for m in matches %}
+                    <tr>
+
+                        <td style="
+                            padding:12px;
+                            border:1px solid var(--dark);
+                            text-align:center;
+                            font-weight:700;
+                        ">
+                            <img src="/dataset/{{ filename_map[m.person_id] }}"
+                                 style="
+                                    width:120px;
+                                    border-radius:12px;
+                                    border:2px solid var(--dark);
+                                    margin-bottom:8px;
+                                 ">
+                            <br>
+                            <br>
+                                {{m.name or "Unknown"}}
+                                <br>
+                                <small>UID: {{m.person_id}}</small>
+                        </td>
+
+                        <td style="
+                            padding:12px;
+                            border:1px solid var(--dark);
+                            text-align:center;
+                            font-weight:800;
+                            font-size:18px;
+                        ">
+                            {{ (m.similarity|float * 100)|round(1) }}%
+                        </td>
+
+                        <td style="
+                            padding:12px;
+                            border:1px solid var(--dark);
+                            text-align:center;
+                        ">
+                            <img src="/cases/{{ m.case_id }}/corpse.jpg"
+                                 style="
+                                    width:120px;
+                                    border-radius:12px;
+                                    border:2px solid var(--dark);
+                                 ">
+                        </td>
+
+                        <td style="
+                            padding:12px;
+                            border:1px solid var(--dark);
+                            text-align:center;
+                            font-size:13px;
+                            font-weight:600;
+                        ">
+                            {{ m.timestamp }}
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+
+                </table>
+
+            </div>
+
+            {% else %}
+            <div id="noConfirmedMatches" style="
+                background:var(--light);
+                color:var(--dark);
+                border-radius:16px;
+                border:2px solid var(--dark);
+                padding:40px;
+                text-align:center;
+                font-weight:700;
+            ">
+                No confirmed matches yet.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    </div>
+</div>
+
+<!-- TAB 4: ADD MISSING CHILD -->
+<div class="tab-panel" id="child_missing">
+    <div class="container">
+        <!-- LEFT PANEL: Image Gallery -->
+        <div class="left-pane">
+            <h3>📸 Uploaded Images <span id="childImageCount" style="font-size: 12px; opacity: 0.8;"></span></h3>
+            <div id="childImageGallery" class="image-gallery">
+                <div class="empty-gallery">No images selected yet<br>Click "Choose Files" to add photos</div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: Compact Form -->
+        <div class="right-pane">
+            <h3 style="font-size: 1rem; color: var(--light);   margin-bottom: 10px;">📝 Register Missing Child</h3>
+            <form method="POST" action="/add_child_missing" enctype="multipart/form-data" class="missing-person-form" id="childMissingPersonForm">
+                <div class="form-group">
+                    <label>🖼️ Upload Photos</label>
+                    <input type="file" name="child_images" accept="image/*" multiple onchange="previewMultipleImages(event, 'child')" required>
+                    <small>Select multiple images for better accuracy</small>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>👤 Full Name</label>
+                        <input type="text" name="name" placeholder="Full name" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>📅 Date of Birth</label>
+                        <input type="date" name="dob" required>
+                    </div>
+                    <div class="form-group">
+                        <label>⚥ Gender</label>
+                        <select name="gender" required>
+                            <option value="">Select</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>🎨 Skin Tone</label>
+                        <select name="skin_tone" required>
+                            <option value="">Select</option>
+                            <option value="fair">Fair</option>
+                            <option value="medium">Medium</option>
+                            <option value="dark">Dark</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>💇 Hair Color</label>
+                        <select name="hair_color" required>
+                            <option value="">Select</option>
+                            <option value="black">Black</option>
+                            <option value="brown">Brown</option>
+                            <option value="blonde">Blonde</option>
+                            <option value="grey">Grey</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="section-title">🔖 Scars / Identification Marks</div>
+                <div id="child-marks-container"></div>
+                <button type="button" onclick='addMark("child-marks-container")' style="width: 100%; margin-top: 4px;">+ Add Mark</button>
+
+                <div class="section-title">📍 Last Known Location</div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>State</label>
+                        <input type="text" name="last_state" placeholder="State" required>
+                    </div>
+                    <div class="form-group">
+                        <label>City</label>
+                        <input type="text" name="last_city" placeholder="City" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Area/Landmark</label>
+                        <input type="text" name="last_area" placeholder="Area">
+                    </div>
+                    <div class="form-group">
+                        <label>Last Seen Date</label>
+                        <input type="date" name="last_seen_date" required>
+                    </div>
+                </div>
+
+                <button type="submit" style="width: 100%; margin-top: 8px;">💾 Save Missing Child Record</button>
+                <input type="hidden" name="form_type" value="add_child_missing">
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- TAB 5: ID CHILD / MATCH -->
+<div class="tab-panel" id="IDchild">
+
+    <div class="container">
+
+        <!-- LEFT RESULTS -->
+        <div class="left-pane" id="child-left-pane">
+
+            {% if child_sims and child_sims|length > 0 %}
+
+                {% for img in child_images %}
+
+                    {% set sim_val = child_sims[img] if img in child_sims else 0 %}
+                    {% set sim_percent = (sim_val * 100)|round(1) %}
+                    {% set meta = child_metadata_map.get(img, {}) %}
+
+                    <div class="image-block"
+                        data-sim="{{ sim_val }}"
+                        data-age="{{ meta.get('dob','') }}"
+                        data-gender="{{ meta.get('gender','') }}"
+                        data-skin="{{ meta.get('skin_tone','') }}"
+                        data-hair="{{ meta.get('hair_color','') }}"
+                        data-marks='{{ meta.get("marks", []) | tojson }}'>
+
+                        <input
+                            type="checkbox"
+                            name="child_confirm"
+                            value="{{ img }}"
+                            data-sim="{{ sim_val }}"
+                        >
+
+                        <img
+                            src="{{ url_for('child_thumb_file', filename=child_filename_map[img]) }}"
+                            alt="{{ img }}"
+                        >
+
+                        <div class="similarity">
+                            📊 <span>{{ sim_percent }}%</span>
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div style="color:var(--light); text-align:center; padding:20px;">
+                    <p>🔍 No child matches yet</p>
+                    <p style="font-size:12px; margin-top:10px;">
+                        Upload a child image to begin matching
+                    </p>
+                </div>
+
+            {% endif %}
+
+        </div>
+
+        <!-- CENTER PREVIEW -->
+        <div class="preview-container">
+
+            {% if child_uploaded_image %}
+
+                <img id="uploaded_image" src="{{ child_uploaded_image }}">
+
+            {% else %}
+
+                <div style="text-align:center; color:var(--dark);">
+                    <p>📸 No Image Uploaded</p>
+                    <p style="font-size:12px;">
+                        Upload child face image
+                    </p>
+                </div>
+
+            {% endif %}
+
+        </div>
+
+        <!-- RIGHT FILTER -->
+        <div class="right-pane" style="max-width:340px;">
+
+            <!-- SEARCH -->
+            <form
+                method="POST"
+                action="/search_child"
+                enctype="multipart/form-data"
+                style="margin-bottom:15px;"
+            >
+
+                <label style="
+                    color:var(--light);
+                    font-weight:700;
+                    font-size:12px;
+                ">
+                    {% if child_case_id and child_case_id != -1 %}
+                        CaseID: {{ child_case_id }}
+                    {% else %}
+                        📤 Upload Child Face:
+                    {% endif %}
+                </label>
+
+                {% if child_case_id and child_case_id == -1 %}
+                    <input
+                        type="file"
+                        name="child_file"
+                        accept="image/*"
+                        required
+                        style="
+                            margin:8px 0;
+                            background:var(--light);
+                        "
+                    >                
+                    <button type="submit" style="width:100%;">
+                        🔍 Match Child
+                    </button>
+                {% else %}
+
+                    <input type="hidden" name="child_image_path" value="{{ child_uploaded_image }}">
+
+                {% endif %}
+
+
+
+                <input
+                    type="hidden"
+                    name="form_type"
+                    value="child_image_search"
+                >
+
+            </form>
+
+            <!-- FILTERS -->
+            <form
+                id="childFilterForm"
+                onsubmit="return false;"
+                class="filter-form"
+            >
+
+                <h3 style="
+                    color:var(--dark);
+                    margin-bottom:12px;
+                ">
+                    🎯 Filter Results
+                </h3>
+
+                <div class="form-group">
+
+                    <label>
+                        📊 Age Range:
+                        <span id="childAgeLabel"></span>
+                    </label>
+
+                    <input
+                        type="range"
+                        id="child_age_min"
+                        min="0"
+                        max="18"
+                        value="0"
+                    >
+
+                    <input
+                        type="range"
+                        id="child_age_max"
+                        min="0"
+                        max="18"
+                        value="18"
+                    >
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>⚥ Gender:</label>
+
+                    <select name="gender">
+
+                        <option value="">Any</option>
+
+                        <option value="male">Male</option>
+
+                        <option value="female">Female</option>
+
+                    </select>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>🎨 Skin Tone:</label>
+
+                    <select name="skin_tone">
+
+                        <option value="">Any</option>
+
+                        <option value="fair">Fair</option>
+
+                        <option value="medium">Medium</option>
+
+                        <option value="dark">Dark</option>
+
+                    </select>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>💇 Hair Color:</label>
+
+                    <select name="hair_color">
+
+                        <option value="">Any</option>
+
+                        <option value="black">Black</option>
+
+                        <option value="brown">Brown</option>
+
+                        <option value="blonde">Blonde</option>
+
+                        <option value="grey">Grey</option>
+
+                    </select>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>🔖 Marks Filter:</label>
+
+                    <div id="child-marks-filter"></div>
+
+                    <button
+                        type="button"
+                        onclick='addMark("child-marks-filter")'
+                        style="margin-top:6px; width:100%;"
+                    >
+                        + Add Mark Filter
+                    </button>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+                        🎯 Min Similarity:
+                        <span id="child-threshold-value">0.50</span>
+                    </label>
+
+                    <input
+                        type="range"
+                        id="child-threshold"
+                        min="0.0"
+                        max="1.0"
+                        step="0.01"
+                        value="0.5"
+                    >
+
+                </div>
+
+                <button
+                    type="button"
+                    onclick="collectChildConfirmed()"
+                    style="width:100%; margin-top:8px;"
+                >
+                    ✅ Confirm Child Match
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+<div class="tab-panel" id="child_confirmed">
+    <div class="container">
+    <div id="confirmedChildWrapper" style="width: 100%;">
+        <div class="left-pane" style="width:100%; flex:1;">
+            <h3>✅ Confirmed Matches</h3>
+
+            {% if child_matches and child_matches|length > 0 %}
+            <div id="tableWrapper">
+
+                <table style="
+                    width:100%;
+                    border-collapse:collapse;
+                    background:var(--light);
+                    color:var(--dark);
+                ">
+
+                    <thead>
+                        <tr>
+                            <th class="confirmed-th">Matched Child</th>
+                            <th class="confirmed-th">Similarity</th>
+                            <th class="confirmed-th">Case image</th>
+                            <th class="confirmed-th">Timestamp</th>
+                        </tr>
+                    </thead>
+
+                    {% for m in child_matches %}
+                    <tr>
+
+                        <td style="
+                            padding:12px;
+                            border:1px solid var(--dark);
+                            text-align:center;
+                            font-weight:700;
+                        ">
+                            <img src="/child_dataset/{{ child_filename_map[m.child_id] }}"
+                                 style="
+                                    width:120px;
+                                    border-radius:12px;
+                                    border:2px solid var(--dark);
+                                    margin-bottom:8px;
+                                 ">
+                            <br>
+                            <br>
+                                {{m.name or "Unknown"}}
+                                <br>
+                                <small>Child_ID: {{m.child_id}}</small>
+                        </td>
+
+                        <td style="
+                            padding:12px;
+                            border:1px solid var(--dark);
+                            text-align:center;
+                            font-weight:800;
+                            font-size:18px;
+                        ">
+                            {{ (m.similarity|float * 100)|round(1) }}%
+                        </td>
+
+                        <td style="
+                            padding:12px;
+                            border:1px solid var(--dark);
+                            text-align:center;
+                        ">
+                            <img src="{{m.image}}"
+                                 style="
+                                    width:120px;
+                                    border-radius:12px;
+                                    border:2px solid var(--dark);
+                                 ">
+                        </td>
+
+                        <td style="
+                            padding:12px;
+                            border:1px solid var(--dark);
+                            text-align:center;
+                            font-size:13px;
+                            font-weight:600;
+                        ">
+                            {{ m.timestamp }}
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+
+                </table>
+
+            </div>
+
+            {% else %}
+            <div id="noConfirmedMatches" style="
+                background:var(--light);
+                color:var(--dark);
+                border-radius:16px;
+                border:2px solid var(--dark);
+                padding:40px;
+                text-align:center;
+                font-weight:700;
+            ">
+                No confirmed matches yet.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    </div>
+</div>
+<div class="tab-panel" id="child_pending">
+
+    <div class="container">
+    <div id="pendingChildWrapper" style="width: 100%;">
+        <div class="left-pane" style="flex:1; width:100%;">
+
+            <h3>🟡 Pending Child Cases</h3>
+
+            {% if child_pending_cases and child_pending_cases|length > 0 %}
+
+            <div id="tableWrapper">
+
+                <table style="
+                    width:100%;
+                    border-collapse:collapse;
+                    background:var(--light);
+                    color:var(--dark);
+                ">
+
+                    <thead>
+                        <tr>
+                            <th class="confirmed-th">Photo Given</th>
+                            <th class="confirmed-th">Last Seen At</th>
+                            <th class="confirmed-th">Reporter's Data</th>
+                            <th class="confirmed-th">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                    {% for c in child_pending_cases %}
+
+                    <tr>
+
+                        <td style="
+                            padding:12px;
+                            border:1px solid var(--dark);
+                            text-align:center;
+                            padding: 12px;
+                            font-weight: 700;
+                        ">
+                            <img
+                                src="{{ c.image }}"
+                                style="
+                                    width:120px;
+                                    border-radius:12px;
+                                    border:2px solid var(--dark);
+                                "
+                            >
+                            <br>
+                            <br>
+                            CaseID: {{c.case_id}}
+                        </td>
+
+                        <td style="
+                            padding:12px;
+                            border:1px solid var(--dark);
+                            text-align:center;
+                            font-weight:700;
+                        ">
+                        {{c.last_seen}}
+                        <br>
+                        {{c.event_description}}
+
+                        </td>
+
+                        <td style="
+                            padding:12px;
+                            border:1px solid var(--dark);
+                            text-align:center;
+                            font-weight:700;
+                        ">
+                        {{ c.name }}
+                        <br>
+                        <br>
+                        PHONE: +91{{c.phone}}
+                        <br>
+                        ADDRESS: {{c.address}}
+                        <br>
+
+                        </td>
+
+                        <td style="
+                            padding:12px;
+                            border:1px solid var(--dark);
+                            text-align:center;
+                        ">
+
+                            <a
+                                href="/search_child_case/{{ c.case_id }}"
+                                style="
+                                    display:inline-block;
+                                    background:var(--dark);
+                                    color:var(--light);
+                                    padding:8px 14px;
+                                    border-radius:10px;
+                                    text-decoration:none;
+                                    font-weight:700;
+                                "
+                            >
+                                🔍 Match
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <div style="
+                background:var(--light);
+                color:var(--dark);
+                border-radius:16px;
+                border:2px solid var(--dark);
+                padding:40px;
+                text-align:center;
+                font-weight:700;
+            ">
+                No pending child cases.
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    </div>
+
+</div>
+<script>
+    const root = document.documentElement;
+    console.log("{{child_matches}}");
+    const deadTabs = document.querySelectorAll(".dead");
+    const childTabs = document.querySelectorAll(".child");
+
+    const deadModeBtn = document.getElementById("deadModeBtn");
+    const childModeBtn = document.getElementById("childModeBtn");
+
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+
+            const target = btn.dataset.tab;
+
+            /* CHILD THEME */
+            const isChild =
+                btn.classList.contains("child");
+
+            // if (isChild) {
+            //     root.style.setProperty('--dark', '#123f89');
+            //     //root.style.setProperty('--light', '#FFE8BE');
+            // } else {
+            //     root.style.setProperty('--dark', '#A4193D');
+            //     //root.style.setProperty('--light', '#FFDFB9');
+            // }
+
+            localStorage.setItem("activeTab", target);
+
+            document.querySelectorAll(".tab-btn")
+                .forEach(b => b.classList.remove("active"));
+
+            document.querySelectorAll(".tab-panel")
+                .forEach(p => p.classList.remove("active"));
+
+            btn.classList.add("active");
+            document.getElementById(target).classList.add("active");
+
+            if(target === "IDdead" && typeof filterImages === "function"){
+                setTimeout(filterImages, 100);
+            }
+        });
+    });
+
+    function switchMode(mode){
+
+        const isChild = mode === "child";
+
+        /* SHOW/HIDE TABS */
+        deadTabs.forEach(tab=>{
+            tab.style.display = isChild ? "none" : "";
+        });
+
+        childTabs.forEach(tab=>{
+            tab.style.display = isChild ? "" : "none";
+        });
+
+        /* MODE BUTTON STATES */
+        deadModeBtn.classList.toggle("active", !isChild);
+        childModeBtn.classList.toggle("active", isChild);
+
+        /* SWITCH THEME */
+        if(isChild){
+            root.style.setProperty('--dark', '#123f89');
+            //root.style.setProperty('--light', '#F59E0B');
+        }else{
+            root.style.setProperty('--dark', '#A4193D');
+            //root.style.setProperty('--light', '#FFDFB9');
+        }
+
+        /* AUTO SELECT FIRST TAB */
+        const firstTab = isChild
+            ? document.querySelector('.child.tab-btn')
+            : document.querySelector('.dead.tab-btn');
+
+        if(firstTab){
+            firstTab.click();
+        }
+    }
+
+    /* TOGGLE EVENTS */
+    deadModeBtn.addEventListener("click", ()=>switchMode("dead"));
+    childModeBtn.addEventListener("click", ()=>switchMode("child"));
+
+    let uploadedImages = [];
+
+    function previewMultipleImages(event, type = "dead") {
+
+        const gallery = type === "child"
+            ? document.getElementById('childImageGallery')
+            : document.getElementById('imageGallery');
+        const count = type === "child"
+            ? document.getElementById('childImageCount')
+            : document.getElementById('imageCount');
+
+        const files = Array.from(event.target.files);
+        uploadedImages = files;
+        
+        gallery.innerHTML = '';
+        
+        if (files.length === 0) {
+            gallery.innerHTML = '<div class="empty-gallery">No images selected yet<br>Click "Choose Files" to add photos</div>';
+            count.textContent = '';
+            return;
+        }
+        
+        count.textContent = `(${files.length})`;
+        
+        files.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                div.className = 'image-preview-item';
+                div.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview ${index + 1}">
+                    <button type="button" class="remove-img" onclick="removeImage(${index},'${type}')">✕</button>
+                `;
+                gallery.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function removeImage(index, type = "dead") {
+        uploadedImages.splice(index, 1);
+        const fileInput = type === "child"
+            ? document.querySelector('#child_missing input[name="child_images"]')
+            : document.querySelector('#missing input[name="person_images"]');
+        const dt = new DataTransfer();
+        uploadedImages.forEach(file => dt.items.add(file));
+        fileInput.files = dt.files;
+        previewMultipleImages({ target: fileInput }, type);
+    }
+
+    {% if uploaded_metadata %}
+        alert("✅ Face Analysis Complete!\n\nAge: {{ uploaded_metadata.age }}\nGender: {{ uploaded_metadata.gender }}\nSkin Tone: {{ uploaded_metadata.skin_tone }}");
+    {% endif %}
+
+    const caseId = "{{ case_id }}";
+
+    function filterImages() {
+        const threshold = parseFloat(document.getElementById("threshold")?.value || 0.5);
+        const ageMin = parseInt(document.getElementById("age_min")?.value || 0);
+        const ageMax = parseInt(document.getElementById("age_max")?.value || 100);
+        const heightMin = parseInt(document.getElementById("height_min")?.value || 0);
+        const heightMax = parseInt(document.getElementById("height_max")?.value || 999);
+        const filterForm = document.getElementById("filterForm");
+        if(!filterForm) return;
+        
+        const gender = filterForm.querySelector("select[name='gender']")?.value || "";
+        const skin = filterForm.querySelector("select[name='skin_tone']")?.value || "";
+        const hair = filterForm.querySelector("select[name='hair_color']")?.value || "";
+        
+        const markFilters = [];
+        document.querySelectorAll("#marks-filter .mark-entry").forEach(entry => {
+            const type = entry.querySelector("select[name='mark_type[]']")?.value;
+            const part = entry.querySelector("select[name='body_part[]']")?.value;
+            if(type && part) markFilters.push({ type, body_part: part });
+        });
+
+        document.querySelectorAll('#IDdead .image-block').forEach(block => {
+            const sim = parseFloat(block.dataset.sim || 0);
+            const g = block.dataset.gender?.toLowerCase() || "";
+            const s = block.dataset.skin?.toLowerCase() || "";
+            const h = block.dataset.hair?.toLowerCase() || "";
+            const dob = block.dataset.age;
+            let age = 0;
+            if(dob) {
+                const birthYear = new Date(dob).getFullYear();
+                const currentYear = new Date().getFullYear();
+                age = currentYear - birthYear;
+            }
+            const hMin = parseInt(block.dataset.heightMin || 0);
+            const hMax = parseInt(block.dataset.heightMax || 999);
+            let datasetMarks = [];
+            try { datasetMarks = JSON.parse(block.dataset.marks || "[]"); } catch(e) {}
+            
+            let visible = true;
+            if(sim < threshold) visible = false;
+            if(gender && g !== gender.toLowerCase()) visible = false;
+            if(skin && s !== skin.toLowerCase()) visible = false;
+            if(hair && h !== hair.toLowerCase()) visible = false;
+            if(heightMin > hMax || heightMax < hMin) visible = false;
+            if(age < ageMin || age > ageMax) visible = false;
+            if(markFilters.length > 0) {
+                const match = markFilters.some(filterMark => 
+                    datasetMarks.some(datasetMark => 
+                        datasetMark.type === filterMark.type && datasetMark.body_part === filterMark.body_part
+                    )
+                );
+                if(!match) visible = false;
+            }
+            block.style.display = visible ? "block" : "none";
+        });
+    }
+
+    function filterChildImages() {
+        const threshold = parseFloat(document.getElementById("child-threshold")?.value || 0.5);
+        const ageMin = parseInt(document.getElementById("child_age_min")?.value || 0);
+        const ageMax = parseInt(document.getElementById("child_age_max")?.value || 18);
+        
+        const form = document.getElementById("childFilterForm");
+
+        if(!form) return;
+
+        const gender = form.querySelector("select[name='gender']").value.toLowerCase();
+        const skin = form.querySelector("select[name='skin_tone']").value.toLowerCase();
+        const hair = form.querySelector("select[name='hair_color']").value.toLowerCase();
+
+        const markFilters = [];
+        document.querySelectorAll("#child-marks-filter .mark-entry").forEach(entry => {
+            const type = entry.querySelector("select[name='mark_type[]']")?.value;
+            const part = entry.querySelector("select[name='body_part[]']")?.value;
+            if(type && part) markFilters.push({ type, body_part: part });
+        });
+
+        document.querySelectorAll('#IDchild .image-block').forEach(block => {
+            const sim = parseFloat(block.dataset.sim || 0);
+            const g = block.dataset.gender?.toLowerCase() || "";
+            const s = block.dataset.skin?.toLowerCase() || "";
+            const h = block.dataset.hair?.toLowerCase() || "";
+            const dob = block.dataset.age;
+
+            let age = 0;
+
+            if(dob){
+                age =
+                    new Date().getFullYear() -
+                    new Date(dob).getFullYear();
+            }
+            let datasetMarks = [];
+            try { datasetMarks = JSON.parse(block.dataset.marks || "[]"); } catch(e) { console.log(e); }
+
+            let visible = true;
+
+            if(sim < threshold) visible = false;
+
+            if(gender && g !== gender.toLowerCase())
+                visible = false;
+
+            if(skin && s !== skin.toLowerCase())
+                visible = false;
+
+            if(hair && h !== hair.toLowerCase())
+                visible = false;
+
+            if(age < ageMin || age > ageMax)
+                visible = false;
+
+            if(markFilters.length > 0) {
+                const match = markFilters.some(filterMark => 
+                    datasetMarks.some(datasetMark => 
+                        datasetMark.type === filterMark.type && datasetMark.body_part === filterMark.body_part
+                    )
+                );
+                if(!match) visible = false;
+            }
+
+            block.style.display =
+                visible ? "block" : "none";
+
+        });
+    }
+
+    function collectConfirmed() {
+        const checked = Array.from(document.querySelectorAll('#IDdead input[name="confirm"]:checked')).map(cb => ({
+            person_id: cb.value,
+            similarity: cb.dataset.sim
+        }));
+        if(checked.length === 0) {
+            alert("Please select at least one image to confirm.");
+            return;
+        }
+        fetch("/confirm_dead_match", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ matches: checked, case_id: caseId })
+        })
+        .then(res => res.json())
+        .then(data => {
+
+            fetch("/get_confirmed_dead_matches")
+            .then(res => res.json())
+            .then(serverData => {
+
+                const wrapper = document.getElementById("confirmedWrapper");
+
+                const matches = serverData.matches;
+                const filenameMap = serverData.filename_map;
+
+                if(matches.length === 0){
+                    wrapper.innerHTML = `
+                    <div class="left-pane" style="width:100%; flex:1;">
+                    <h3>✅ Confirmed Matches</h3>
+                        <div id="noConfirmedMatches"
+                            style="
+                                background:var(--light);
+                                color:var(--dark);
+                                border-radius:16px;
+                                border:2px solid var(--dark);
+                                padding:40px;
+                                text-align:center;
+                                font-weight:700;
+                            ">
+                            No confirmed matches yet.
+                        </div>
+                    </div>
+                    `;
+                    return;
+                }
+
+                let html = `
+                <div class="left-pane" style="width:100%; flex:1;">
+                <h3>✅ Confirmed Matches</h3>
+                    <div id="tableWrapper">
+                    <table style="
+                        width:100%;
+                        border-collapse:collapse;
+                        background:var(--light);
+                        color:var(--dark);
+                    ">
+
+                    <thead>
+                        <tr>
+                            <th class="confirmed-th">Matched Person</th>
+                            <th class="confirmed-th">Similarity</th>
+                            <th class="confirmed-th">Uploaded Corpse</th>
+                            <th class="confirmed-th">Timestamp</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="confirmedTableBody">
+                `;
+
+                matches.reverse().forEach(m => {
+
+                    html += `
+                        <tr>
+
+                            <td style="
+                                padding:12px;
+                                border:1px solid var(--dark);
+                                text-align:center;
+                                font-weight:700;
+                            ">
+                                <img src="/dataset/${filenameMap[m.person_id]}"
+                                    style="
+                                        width:120px;
+                                        border-radius:12px;
+                                        border:2px solid var(--dark);
+                                        margin-bottom:8px;
+                                    ">
+                                <br>
+                                ${m.name || "Unknown"}
+                                <br>
+                                <small>${m.person_id}</small>
+                            </td>
+
+                            <td style="
+                                padding:12px;
+                                border:1px solid var(--dark);
+                                text-align:center;
+                                font-weight:800;
+                                font-size:18px;
+                            ">
+                                ${(parseFloat(m.similarity) * 100).toFixed(1)}%
+                            </td>
+
+                            <td style="
+                                padding:12px;
+                                border:1px solid var(--dark);
+                                text-align:center;
+                            ">
+                                <img src="/cases/${m.case_id}/corpse.jpg"
+                                    style="
+                                        width:120px;
+                                        border-radius:12px;
+                                        border:2px solid var(--dark);
+                                    ">
+                            </td>
+
+                            <td style="
+                                padding:12px;
+                                border:1px solid var(--dark);
+                                text-align:center;
+                                font-size:13px;
+                                font-weight:600;
+                            ">
+                                ${m.timestamp}
+                            </td>
+
+                        </tr>
+                    `;
+                });
+
+                html += `</tbody></table></div></div>`;
+
+                wrapper.innerHTML = html;
+
+                alert("✓ Confirmed matches saved successfully.");
+            });
+
+        })
+    }
+
+    function collectChildConfirmed() {
+
+        const checked =
+            Array.from(
+                document.querySelectorAll('#IDchild input[name="child_confirm"]:checked')
+            ).map(cb => ({
+                child_id: cb.value,
+                similarity: cb.dataset.sim
+            }));
+
+        if (checked.length === 0) {
+            alert("Select at least one child match.");
+            return;
+        }
+
+        const img = document.getElementById("uploaded_image");
+
+        const case_id = Number("{{ child_case_id or -1 }}");
+
+        fetch("/confirm_child_match", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                matches: checked,
+                case_id: "{{ child_case_id or -1 }}",
+                uploaded_image: (case_id == -1) ? img.getAttribute("src") : null
+            })
+        }).then(res => res.json())
+        .then(data => {
+
+            fetch("/get_confirmed_child_matches")
+            .then(res => res.json())
+            .then(serverData => {
+
+                const wrapper = document.getElementById("confirmedChildWrapper");
+
+                const matches = serverData.child_matches;
+                const filenameMap = serverData.child_filename_map;
+
+                if(matches.length === 0){
+                    wrapper.innerHTML = `
+                    <div class="left-pane" style="width:100%; flex:1;">
+                    <h3>✅ Confirmed Matches</h3>
+                        <div id="noConfirmedMatches"
+                            style="
+                                background:var(--light);
+                                color:var(--dark);
+                                border-radius:16px;
+                                border:2px solid var(--dark);
+                                padding:40px;
+                                text-align:center;
+                                font-weight:700;
+                            ">
+                            No confirmed matches yet.
+                        </div>
+                    </div>
+                    `;
+                    return;
+                }
+
+                let html = `
+                <div class="left-pane" style="width:100%; flex:1;">
+                <h3>✅ Confirmed Matches</h3>
+                    <div id="tableWrapper">
+                    <table style="
+                        width:100%;
+                        border-collapse:collapse;
+                        background:var(--light);
+                        color:var(--dark);
+                    ">
+
+                    <thead>
+                        <tr>
+                            <th class="confirmed-th">Matched Person</th>
+                            <th class="confirmed-th">Similarity</th>
+                            <th class="confirmed-th">Uploaded Corpse</th>
+                            <th class="confirmed-th">Timestamp</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="confirmedTableBody">
+                `;
+
+                matches.reverse().forEach(m => {
+
+                    html += `
+                        <tr>
+
+                            <td style="
+                                padding:12px;
+                                border:1px solid var(--dark);
+                                text-align:center;
+                                font-weight:700;
+                            ">
+                                <img src="/child_dataset/${filenameMap[m.child_id]}"
+                                    style="
+                                        width:120px;
+                                        border-radius:12px;
+                                        border:2px solid var(--dark);
+                                        margin-bottom:8px;
+                                    ">
+                                <br>
+                                ${m.name || "Unknown"}
+                                <br>
+                                <small>Child_ID: ${m.child_id}</small>
+                            </td>
+
+                            <td style="
+                                padding:12px;
+                                border:1px solid var(--dark);
+                                text-align:center;
+                                font-weight:800;
+                                font-size:18px;
+                            ">
+                                ${(parseFloat(m.similarity) * 100).toFixed(1)}%
+                            </td>
+
+                            <td style="
+                                padding:12px;
+                                border:1px solid var(--dark);
+                                text-align:center;
+                            ">
+                                <img src="${m.image}"
+                                    style="
+                                        width:120px;
+                                        border-radius:12px;
+                                        border:2px solid var(--dark);
+                                    ">
+                            </td>
+
+                            <td style="
+                                padding:12px;
+                                border:1px solid var(--dark);
+                                text-align:center;
+                                font-size:13px;
+                                font-weight:600;
+                            ">
+                                ${m.timestamp}
+                            </td>
+
+                        </tr>
+                    `;
+                });
+
+                
+                html += `</tbody></table></div></div>`;
+
+                wrapper.innerHTML = html;
+            });
+
+            fetch("/get_pending_child_cases")
+            .then(res => res.json())
+            .then(serverData => {
+
+                const wrapper = document.getElementById("pendingChildWrapper");
+
+                const child_pending_cases = serverData.child_pending_cases;
+
+                if(child_pending_cases.length === 0){
+                    wrapper.innerHTML = `
+                    <div class="left-pane" style="flex:1; width:100%;"> 
+                    <h3>🟡 Pending Child Cases</h3>
+                        <div style="
+                            background:var(--light);
+                            color:var(--dark);
+                            border-radius:16px;
+                            border:2px solid var(--dark);
+                            padding:40px;
+                            text-align:center;
+                            font-weight:700;
+                        ">
+                            No pending child cases.
+                        </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = `
+                <div class="left-pane" style="flex:1; width:100%;">
+                <h3>🟡 Pending Child Cases</h3>
+                    <div id="tableWrapper">
+                    <table style="
+                        width:100%;
+                        border-collapse:collapse;
+                        background:var(--light);
+                        color:var(--dark);
+                    ">
+
+                    <thead>
+                        <tr>
+                            <th class="confirmed-th">Photo Given</th>
+                            <th class="confirmed-th">Last Seen At</th>
+                            <th class="confirmed-th">Reporter's Data</th>
+                            <th class="confirmed-th">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                `;
+
+                child_pending_cases.reverse().forEach(m => {
+
+                    html += `
+                        <tr>
+
+                            <td style="
+                                padding:12px;
+                                border:1px solid var(--dark);
+                                text-align:center;
+                                font-weight:700;
+                            ">
+                                <img src="${m.image}"
+                                    style="
+                                        width:120px;
+                                        border-radius:12px;
+                                        border:2px solid var(--dark);
+                                    ">
+                                <br>
+                                <br>
+                                Case_ID: ${m.case_id}
+                            </td>
+
+                            <td style="
+                                padding:12px;
+                                border:1px solid var(--dark);
+                                text-align:center;
+                                font-weight:700;
+                            ">
+                            ${m.last_seen}%
+                            </td>
+
+                            <td style="
+                                padding:12px;
+                                border:1px solid var(--dark);
+                                text-align:center;
+                                font-weight:700;
+                            ">
+                             ${ m.name }
+                            <br>
+                            <br>
+                            PHONE: +91${m.phone}
+                            <br>
+                            ADDRESS: ${m.address}
+                            <br>
+                            </td>
+
+                            <td style="
+                                padding:12px;
+                                border:1px solid var(--dark);
+                                text-align:center;
+                            ">
+                                <a
+                                    href="/search_child_case/${ m.case_id }"
+                                    style="
+                                        display:inline-block;
+                                        background:var(--dark);
+                                        color:var(--light);
+                                        padding:8px 14px;
+                                        border-radius:10px;
+                                        text-decoration:none;
+                                        font-weight:700;
+                                    "
+                                >
+                                    🔍 Match
+                                </a>
+
+                            </td>
+
+                        </tr>
+                    `;
+                });
+
+                html += `</tbody></table></div></div>`;
+
+                wrapper.innerHTML = html;
+
+        });
+
+        alert("✓ Confirmed matches saved successfully.");
+        }).catch(err => {
+                console.error(err);
+                alert("Frontend JSON error");
+        });
+    }
+    function addMark(containerId) {
+        const container = document.getElementById(containerId);
+        if(!container) return;
+        const div = document.createElement("div");
+        div.className = "mark-entry";
+        let descriptionField = "";
+        if(containerId === "marks-container") {
+            descriptionField = `<input type="text" name="description[]" placeholder="Description">`;
+        }
+        div.innerHTML = `
+            <select name="mark_type[]">
+                <option value="scar">Scar</option>
+                <option value="tattoo">Tattoo</option>
+                <option value="burn">Burn</option>
+                <option value="birthmark">Birthmark</option>
+                <option value="mole">Mole</option>
+            </select>
+            <select name="body_part[]">
+                <option value="forehead">Forehead</option>
+                <option value="left_cheek">Left Cheek</option>
+                <option value="right_cheek">Right Cheek</option>
+                <option value="chin">Chin</option>
+                <option value="neck">Neck</option>
+                <option value="left_arm">Left Arm</option>
+                <option value="right_arm">Right Arm</option>
+                <option value="chest">Chest</option>
+                <option value="back">Back</option>
+            </select>
+            ${descriptionField}
+            <button type="button" class="remove-mark">✕</button>
+        `;
+        container.appendChild(div);
+        div.querySelector(".remove-mark").addEventListener("click", () => {
+            div.remove();
+            if(containerId === "marks-filter") filterImages();
+            if(containerId === "child-marks-filter")filterChildImages();
+        });
+        if(containerId === "marks-filter") {
+            div.querySelectorAll("select").forEach(el => el.addEventListener("change", filterImages));
+            filterImages();
+        }
+        if(containerId === "child-marks-filter"){
+            div.querySelectorAll("select").forEach(el => el.addEventListener("change", filterChildImages));
+            filterChildImages();
+        }
+    }
+
+    function setupRange(minSlider, maxSlider, label, callback) {
+        if(!minSlider || !maxSlider) return;
+        function update() {
+            let minVal = parseInt(minSlider.value);
+            let maxVal = parseInt(maxSlider.value);
+            if(minVal > maxVal) {
+                maxSlider.value = minVal;
+                maxVal = minVal;
+            }
+            if(label) label.textContent = minVal + " - " + maxVal;
+            if(callback){
+                callback();
+            }
+        }
+        minSlider.addEventListener("input", update);
+        maxSlider.addEventListener("input", update);
+        update();
+    }
+
+    const ageMin = document.getElementById("age_min");
+    const ageMax = document.getElementById("age_max");
+    const heightMin = document.getElementById("height_min");
+    const heightMax = document.getElementById("height_max");
+    const ageLabel = document.getElementById("ageLabel");
+    const heightLabel = document.getElementById("heightLabel");
+    if(ageMin && ageMax) setupRange(ageMin, ageMax, ageLabel, filterImages);
+    if(heightMin && heightMax) setupRange(heightMin, heightMax, heightLabel, filterImages);
+
+    const childAgeMin =
+    document.getElementById("child_age_min");
+
+    const childAgeMax =
+        document.getElementById("child_age_max");
+
+    const childAgeLabel =
+        document.getElementById("childAgeLabel");
+
+    if(childAgeMin && childAgeMax){
+
+        setupRange(
+            childAgeMin,
+            childAgeMax,
+            childAgeLabel,
+            filterChildImages
+        );
+
+    }
+    const threshold = document.getElementById("threshold");
+    const thresholdVal = document.getElementById("threshold-value");
+    if(threshold && thresholdVal) {
+        threshold.addEventListener("input", () => {
+            thresholdVal.textContent = parseFloat(threshold.value).toFixed(2);
+            filterImages();
+        });
+    }
+
+    const childThreshold =
+        document.getElementById("child-threshold");
+
+    const childThresholdVal =
+        document.getElementById("child-threshold-value");
+
+    if(childThreshold && childThresholdVal){
+
+        childThreshold.addEventListener("input", ()=>{
+
+            childThresholdVal.textContent =
+                parseFloat(childThreshold.value).toFixed(2);
+
+            filterChildImages();
+
+        });
+
+    }
+
+    document.querySelectorAll("#filterForm select").forEach(el => {
+        el.addEventListener("change", filterImages);
+    });
+
+    document.querySelectorAll("#childFilterForm select")
+    .forEach(el=>{
+
+        el.addEventListener("change", filterChildImages);
+
+    });
+
+    const missingForm = document.getElementById("missingPersonForm");
+    if(missingForm) {
+        missingForm.addEventListener("submit", function(e) {
+            const min = parseInt(document.querySelector("input[name='height_min']")?.value);
+            const max = parseInt(document.querySelector("input[name='height_max']")?.value);
+            if(min > max) {
+                alert("Minimum height cannot be greater than maximum height.");
+                e.preventDefault();
+            }
+        });
+    }
+
+    const serverActiveTab = "{{ active_tab|default('missing') }}";
+
+    const child_Tabs = [
+        "child_missing",
+        "IDchild",
+        "child_confirmed",
+        "child_pending"
+    ];
+
+    /* SWITCH MODE FIRST */
+    if(child_Tabs.includes(serverActiveTab)){
+        switchMode("child");
+    }else{
+        switchMode("dead");
+    }
+
+    /* OPEN TAB */
+    const btn = document.querySelector(
+        `.tab-btn[data-tab="${serverActiveTab}"]`
+    );
+
+    if(btn){
+        btn.click();
+    }
+    {% if sims and sims|length > 0 %}
+        window.addEventListener('load', () => setTimeout(filterImages, 200));
+    {% endif %}
+</script>
+</body>
+</html>
