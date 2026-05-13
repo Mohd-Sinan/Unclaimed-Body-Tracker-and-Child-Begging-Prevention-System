@@ -197,7 +197,12 @@ CorpseID/
 ---
 
 # Installation
-I didn't account for the need for a requirements.txt since the entire project was completed in a total of 10 days during the last semester, where 90% of the work was done on the last 3 days before the final presentation. This took WAY too much effort on my part even though it was a group project, So i'm not going to bother with maintaining this project anymore. IF you have a Software Engineer job for me with a decent salary and perks, DO hire me.
+
+I did not originally account for the need for a `requirements.txt` because this entire project was completed in roughly 10 days during the last semester, with about 90% of the work being done in the final 3 days before the presentation.
+
+This project took an absurd amount of effort from my side despite being a group project, and I do not plan to actively maintain it further.
+
+That said, if you somehow have a Software Engineering job with decent salary and perks, DO hire me.
 
 ## Run Application
 
