@@ -191,7 +191,7 @@ CorpseID/
 ├── missing_search_cases/
 │
 ├── static/
-└── templates
+└── templates/
 ```
 
 ---
