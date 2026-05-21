@@ -472,7 +472,12 @@ It is not a replacement for official law enforcement systems.
 ---
 
 # Pictures
-![Workflow](https://github.com/Mohd-Sinan/Unclaimed-Body-Tracker-and-Child-Begging-Prevention-System/main/workflow.png)
+
+### Workflow
+![Workflow](https://github.com/Mohd-Sinan/Unclaimed-Body-Tracker-and-Child-Begging-Prevention-System/blob/main/workflow.png)
+
+---
+
 # License
 
 MIT License
